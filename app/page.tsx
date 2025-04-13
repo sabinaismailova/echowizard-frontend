@@ -4,6 +4,7 @@ import Header from './components/Header'
 import ChatMessages from './components/ChatMessages'
 import EmptyChatPrompt from './components/EmptyChatPrompt'
 import InputArea from './components/InputArea'
+import YoutubeEmbedVideo from 'youtube-embed-video'
 
 type Message = {
   id: number
@@ -34,59 +35,68 @@ export default function Home() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if ((file && file.type.includes('audio'))) {
-      setUploadedFile(file)
-      setFileUrl(URL.createObjectURL(file))
-      setError('')
+  const handleFileUpload = async () => {
+    let file = uploadedFile
+    try {
+      setIsTyping(true)
 
-      try {
-        setIsTyping(true)
+      const formData = new FormData()
 
-        const formData = new FormData()
+      if (file) {
+        formData.append('audio', file)
+      } else if (youtubeLink) {
+        formData.append('youtubeUrl', youtubeLink)
+      } else {
+        setError('Please upload a valid audio or video file')
+      }
 
-        if (file) {
-          formData.append('audio', file)
-        }
-
-        if (youtubeLink) {
-          formData.append('youtubeUrl', youtubeLink)
-          console.log("youtube link: ", youtubeLink)
-        }
-
-        const summary = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/summarize-upload`, {
+      const summary = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/summarize-upload`,
+        {
           method: 'POST',
           body: formData
-        })
-
-        if (!summary.ok) {
-          throw new Error('Failed to get summary from server')
         }
+      )
 
-        const data = await summary.json()
-
-        setTranscript(data.transcript)
-        setSummaryFileUri(data.fileUri)
-        setMimeType(data.mimeType)
-
-        const botResponse: Message = {
-          id: Date.now(),
-          text: data.summary,
-          sender: 'bot',
-        }
-
-        setMessages(prev => [...prev, botResponse])
-        console.log(botResponse)
-      } catch (error) {
-        console.error('Error getting summary:', error)
-        setError('Failed to generate summary')
-      } finally {
-        setIsTyping(false)
+      if (!summary.ok) {
+        throw new Error('Failed to get summary from server')
       }
-    } else {
-      setError('Please upload a valid audio or video file')
+
+      const data = await summary.json()
+
+      setTranscript(data.transcript)
+      setSummaryFileUri(data.fileUri)
+      setMimeType(data.mimeType)
+
+      const botResponse: Message = {
+        id: Date.now(),
+        text: data.summary,
+        sender: 'bot'
+      }
+
+      if (youtubeLink) {
+        setError('')
+      } else if (file) {
+        console.log('regularFile: ', data.fileUri)
+        setUploadedFile(file)
+        setFileUrl(URL.createObjectURL(file))
+        setError('')
+      }
+
+      setMessages(prev => [...prev, botResponse])
+    } catch (error) {
+      console.error('Error getting summary:', error)
+      setError('Failed to generate summary')
+    } finally {
+      setIsTyping(false)
     }
+  }
+
+  function extractYouTubeId(url: string): string | null {
+    const regex =
+      /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]{11})/
+    const match = url.match(regex)
+    return match ? match[1] : null
   }
 
   const handleSend = async () => {
@@ -118,10 +128,13 @@ export default function Home() {
       formData.append('mimeType', mimeType)
       formData.append('question', userMessage.text)
 
-      const answer = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/answer`, {
-        method: 'POST',
-        body: formData
-      })
+      const answer = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/answer`,
+        {
+          method: 'POST',
+          body: formData
+        }
+      )
 
       const answerData = await answer.json()
 
@@ -142,29 +155,40 @@ export default function Home() {
 
   return (
     <div className='dark flex h-screen flex-col bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100'>
-      <Header clearChat={() => {
-        setMessages([])
-        setUploadedFile(null)
-        setYoutubeLink("")
-      }} />
+      <Header
+        clearChat={() => {
+          setMessages([])
+          setUploadedFile(null)
+          setYoutubeLink('')
+        }}
+      />
       <div className='flex-1 space-y-4 bg-gray-50 p-4 text-gray-900 dark:bg-gray-900 dark:text-gray-100'>
         {messages.length === 0 ? (
           <EmptyChatPrompt
             fileInputRef={fileInputRef}
             uploadedFile={uploadedFile}
+            setUploadedFile={setUploadedFile}
             youtubeLink={youtubeLink}
             setYoutubeLink={setYoutubeLink}
-            handleFileUpload={e => {
-              handleFileUpload(e)
-            }}
+            handleFileUpload={handleFileUpload}
             error={error}
           />
         ) : (
           <>
-            <audio controls>
-              <source src={fileUrl} type='audio/mpeg' />
-              Your browser does not support the audio element.
-            </audio>
+            {uploadedFile ? (
+              <>
+                <p>{uploadedFile.name}</p>
+                <audio controls>
+                  <source src={fileUrl} type='audio/mpeg' />
+                  Your browser does not support the audio element.
+                </audio>
+              </>
+            ) : (
+              <YoutubeEmbedVideo
+                videoId={extractYouTubeId(youtubeLink)}
+                suggestions={false}
+              />
+            )}
             <ChatMessages
               messages={messages}
               isTyping={isTyping}

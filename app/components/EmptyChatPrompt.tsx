@@ -3,15 +3,17 @@ import React from 'react'
 interface EmptyChatPromptProps {
   fileInputRef: React.RefObject<HTMLInputElement | null>
   uploadedFile: File | null
+  setUploadedFile: React.Dispatch<React.SetStateAction<File | null>>
   youtubeLink: string
   setYoutubeLink: React.Dispatch<React.SetStateAction<string>>
-  handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void
+  handleFileUpload: () => void
   error: string
 }
 
 export default function EmptyChatPrompt({
   fileInputRef,
   uploadedFile,
+  setUploadedFile,
   youtubeLink,
   setYoutubeLink,
   handleFileUpload,
@@ -28,7 +30,7 @@ export default function EmptyChatPrompt({
             <input
               type='file'
               ref={fileInputRef}
-              onChange={handleFileUpload}
+              onChange={(e) => {setUploadedFile(e.target.files?.[0] as React.SetStateAction<File | null>)}}
               accept='audio/*,video/*'
               className='hidden'
             />
@@ -52,7 +54,7 @@ export default function EmptyChatPrompt({
           <>
             <div className='mb-4 break-words text-gray-700'>{youtubeLink}</div>
             <button
-              onClick={() => handleFileUpload}
+              onClick={handleFileUpload}
               className='rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700'
             >
               Generate Summary
@@ -64,7 +66,7 @@ export default function EmptyChatPrompt({
           <>
             <div className='mb-2 text-gray-700'>{uploadedFile.name}</div>
             <button
-              onClick={() => handleFileUpload}
+              onClick={handleFileUpload}
               className='rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700'
             >
               Generate Summary
