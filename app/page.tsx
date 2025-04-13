@@ -25,6 +25,7 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState<string>('')
   const [isTyping, setIsTyping] = useState<boolean>(false)
+  const [loading, setLoading] = useState(false)
 
   const [error, setError] = useState<string>('')
 
@@ -39,6 +40,7 @@ export default function Home() {
     let file = uploadedFile
     try {
       setIsTyping(true)
+      setLoading(true)
 
       const formData = new FormData()
 
@@ -89,6 +91,7 @@ export default function Home() {
       setError('Failed to generate summary')
     } finally {
       setIsTyping(false)
+      setLoading(false)
     }
   }
 
@@ -162,7 +165,7 @@ export default function Home() {
           setYoutubeLink('')
         }}
       />
-      <div className='flex-1 space-y-4 bg-gray-50 p-4 text-gray-900 dark:bg-gray-900 dark:text-gray-100 px-10'>
+      <div className='flex-1 space-y-4 bg-gray-50 p-4 px-10 text-gray-900 dark:bg-gray-900 dark:text-gray-100'>
         {messages.length === 0 ? (
           <EmptyChatPrompt
             fileInputRef={fileInputRef}
@@ -171,20 +174,21 @@ export default function Home() {
             youtubeLink={youtubeLink}
             setYoutubeLink={setYoutubeLink}
             handleFileUpload={handleFileUpload}
+            loading={loading}
             error={error}
           />
         ) : (
           <>
             {uploadedFile ? (
-              <div className="max-w-[70%] w-fit rounded-lg p-8 rounded-bl-none bg-gray-200 text-black dark:bg-gray-800 dark:text-white shadow-sm">
+              <div className='w-fit max-w-[70%] rounded-lg rounded-bl-none bg-gray-200 p-8 text-black shadow-sm dark:bg-gray-800 dark:text-white'>
                 <p>{uploadedFile.name}</p>
-                <audio controls className="py-1">
+                <audio controls className='py-1'>
                   <source src={fileUrl} type='audio/mpeg' />
                   Your browser does not support the audio element.
                 </audio>
               </div>
             ) : (
-              <div className="max-w-[70%] w-fit rounded-lg p-8 rounded-bl-none bg-gray-200 text-black dark:bg-gray-800 dark:text-white shadow-sm">
+              <div className='w-fit max-w-[70%] rounded-lg rounded-bl-none bg-gray-200 p-8 text-black shadow-sm dark:bg-gray-800 dark:text-white'>
                 <YoutubeEmbedVideo
                   videoId={extractYouTubeId(youtubeLink)}
                   suggestions={false}
@@ -195,7 +199,6 @@ export default function Home() {
               messages={messages}
               isTyping={isTyping}
               messagesEndRef={messagesEndRef}
-              copyMessage={text => navigator.clipboard.writeText(text)}
             />
           </>
         )}
