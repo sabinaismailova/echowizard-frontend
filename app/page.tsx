@@ -4,7 +4,7 @@ import Header from './components/Header'
 import ChatMessages from './components/ChatMessages'
 import EmptyChatPrompt from './components/EmptyChatPrompt'
 import InputArea from './components/InputArea'
-import YoutubeEmbedVideo from 'youtube-embed-video'
+import ReactPlayer from 'react-player'
 
 type Message = {
   id: number
@@ -95,13 +95,6 @@ export default function Home() {
     }
   }
 
-  function extractYouTubeId(url: string): string | null {
-    const regex =
-      /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]{11})/
-    const match = url.match(regex)
-    return match ? match[1] : null
-  }
-
   const handleSend = async () => {
     if (!inputMessage) return
 
@@ -189,10 +182,7 @@ export default function Home() {
               </div>
             ) : (
               <div className='w-fit max-w-[70%] rounded-lg rounded-bl-none bg-gray-200 p-8 text-black shadow-sm dark:bg-gray-800 dark:text-white'>
-                <YoutubeEmbedVideo
-                  videoId={extractYouTubeId(youtubeLink)}
-                  suggestions={false}
-                />
+                <ReactPlayer url={youtubeLink} width={400} height={240} controls={true}/>
               </div>
             )}
             <ChatMessages
