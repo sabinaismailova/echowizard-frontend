@@ -37,7 +37,7 @@ export default function Home() {
   }, [messages])
 
   const handleFileUpload = async () => {
-    let file = uploadedFile
+    const file = uploadedFile
     try {
       setIsTyping(true)
       setLoading(true)
