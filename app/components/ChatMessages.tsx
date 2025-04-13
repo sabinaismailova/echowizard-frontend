@@ -1,4 +1,5 @@
 import React from 'react'
+import { FiCopy } from "react-icons/fi";
 
 type Message =
   | {
@@ -29,7 +30,7 @@ export default function ChatMessages({
           className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
         >
           <div
-            className={`max-w-[70%] rounded-lg p-3 ${
+            className={`max-w-[70%] group rounded-lg p-8 ${
               message.sender === 'user'
                 ? 'rounded-br-none bg-blue-600 text-white dark:bg-gray-700'
                 : 'rounded-bl-none bg-gray-200 text-black dark:bg-gray-800 dark:text-white'
@@ -39,9 +40,9 @@ export default function ChatMessages({
 
             <button
               onClick={() => copyMessage(message.text)}
-              className='mt-2 text-xs underline'
+              className={`py-2 mt-2 text-xs underline opacity-0 group-hover:opacity-100 `}
             >
-              Copy
+              <FiCopy size={16}/>
             </button>
           </div>
         </div>

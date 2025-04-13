@@ -1,4 +1,5 @@
 import React from 'react'
+import { FiSend } from "react-icons/fi";
 
 interface InputAreaProps {
   inputMessage: string
@@ -25,9 +26,9 @@ export default function InputArea({
         />
         <button
           onClick={handleSend}
-          className='rounded-full bg-blue-600 p-2 text-white transition-colors hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600'
+          className='rounded-full bg-blue-600 p-2 text-white transition-colors hover:bg-blue-700 dark:bg-green-500 dark:hover:bg-green-600'
         >
-          ➤
+          <FiSend size={20}/>
         </button>
       </div>
     </div>

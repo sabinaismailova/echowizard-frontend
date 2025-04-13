@@ -154,7 +154,7 @@ export default function Home() {
   }
 
   return (
-    <div className='dark flex h-screen flex-col bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100'>
+    <div className='dark flex h-screen max-h-[100%] w-screen flex-1 flex-col bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100'>
       <Header
         clearChat={() => {
           setMessages([])
@@ -162,7 +162,7 @@ export default function Home() {
           setYoutubeLink('')
         }}
       />
-      <div className='flex-1 space-y-4 bg-gray-50 p-4 text-gray-900 dark:bg-gray-900 dark:text-gray-100'>
+      <div className='flex-1 space-y-4 bg-gray-50 p-4 text-gray-900 dark:bg-gray-900 dark:text-gray-100 px-10'>
         {messages.length === 0 ? (
           <EmptyChatPrompt
             fileInputRef={fileInputRef}
@@ -176,18 +176,20 @@ export default function Home() {
         ) : (
           <>
             {uploadedFile ? (
-              <>
+              <div className="max-w-[70%] w-fit rounded-lg p-8 rounded-bl-none bg-gray-200 text-black dark:bg-gray-800 dark:text-white shadow-sm">
                 <p>{uploadedFile.name}</p>
-                <audio controls>
+                <audio controls className="py-1">
                   <source src={fileUrl} type='audio/mpeg' />
                   Your browser does not support the audio element.
                 </audio>
-              </>
+              </div>
             ) : (
-              <YoutubeEmbedVideo
-                videoId={extractYouTubeId(youtubeLink)}
-                suggestions={false}
-              />
+              <div className="max-w-[70%] w-fit rounded-lg p-8 rounded-bl-none bg-gray-200 text-black dark:bg-gray-800 dark:text-white shadow-sm">
+                <YoutubeEmbedVideo
+                  videoId={extractYouTubeId(youtubeLink)}
+                  suggestions={false}
+                />
+              </div>
             )}
             <ChatMessages
               messages={messages}
